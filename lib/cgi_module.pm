@@ -13,7 +13,7 @@ use Try::Tiny;
 use Data::Dumper qw(Dumper);
 
 
-# this is OOP
+# This is "OOP", so bless some references.
 sub new {
     my $class = shift;
     my $self = {};
@@ -24,18 +24,7 @@ sub new {
 }
 
 
-sub getJSON {
-    my $class = shift;
-    my $self = shift;
-
-    my $json = JSON->new;
-
-    return $json;
-}
-
-
 sub render {
-    my $class = shift;
     my $self = shift;
     my $data = shift;
 
@@ -53,9 +42,17 @@ sub render {
 }
 
 
+sub getJSON {
+    my $self = shift;
+
+    my $json = JSON->new;
+    print STDERR Dumper($json);
+
+    return $json;
+}
+
 
 sub getDBH {
-    my $class = shift;
     my $self = shift;
 
     my $db_info = {
@@ -74,6 +71,35 @@ sub getDBH {
 
     return $dbh;
 }
+
+
+
+sub getAppointmentsJSONFromDB {
+    my $self = shift;
+
+    print STDERR Dumper("self is: ".$self);
+
+    my $dbh = $self->getDBH();
+
+    my $sth =  $dbh->prepare("
+        select 
+            * 
+        from 
+            appointments
+        order by appointment_time
+    ");
+    $sth->execute() or die "Cant execute SQL statement: $DBI::errstr\n";
+
+    # json-ify
+    my @content;
+    while ( my $contentref = $sth->fetchrow_hashref() )
+    {
+        push( @content, { %{$contentref} } );
+    }
+
+    return $self->getJSON->encode(@content)
+}
+
 
 # return 1 at EOF
 1;

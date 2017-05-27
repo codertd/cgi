@@ -23,8 +23,9 @@ exit;
 
 
 sub main {
-    my $self = shift;
-
+    #
+    ##
+    #
 
     my $q = CGI->new;
     my $cgi_module = new cgi_module();
@@ -35,8 +36,8 @@ sub main {
     try {
 
         # Route "dispatch"
-        if ($q->param('ajaxquery')) { # if its an ajax call, render json.
-            ($content_type,$content_body) = getAjaxData( $q->param('ajaxquery') );
+        if ($q->param('ajax_query')) { # if its an ajax call, render json.
+            ($content_type,$content_body) = getAjaxData( $q );
 
         } elsif ($q->request_method eq 'POST') { # form post.
 
@@ -73,7 +74,7 @@ sub main {
         'cgi'          => $q
     };
 
-    print $cgi_module->render( $self, $data );
+    print $cgi_module->render( $data );
 
     return 1;
 }
@@ -81,7 +82,9 @@ sub main {
 
 
 sub getIndexPage {
-    my $self = shift;
+    #
+    ##
+    #
 
     my $content_type = 'text/html';
     my $content_body = qq~
@@ -100,22 +103,25 @@ It works!
 
 
 sub getAjaxData {
-    my $self = shift;
-    my $query_param = shift;
+    #
+    ##
+    #
+
+    my $cgi = shift;
+
+    print STDERR Dumper($cgi);
 
     my $cgi_module = new cgi_module();
 
     my $content_type = 'application/json';
     my $content_body = {
-        'query' => $query_param,
+        'query' => $cgi->param('ajax_query'),
         'test'  => 1
     };
 
-    my $dbh = $self->getDBH();
-
-
-    # encode as json
-    $content_body = $cgi_module->getJSON->encode($content_body);
+    # Get all appointments, and return encoded as json.
+    $content_body = $cgi_module->getAppointmentsJSONFromDB();
+    print STDERR $content_body;
 
     return ($content_type,$content_body);
 }
