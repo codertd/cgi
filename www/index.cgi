@@ -32,6 +32,7 @@ sub main {
 
 
     my ($content_type, $content_body);
+    my $data_variables = {}; # for interpolation of data
 
     try {
 
@@ -53,17 +54,18 @@ sub main {
             # create the new appointment
             #create_appointment($q);
 
-            ($content_type,$content_body) = getIndexPage();
+
+            ($content_type,$content_body) = getIndexPage($data_variables);
 
         } else { # default landing page.
-            ($content_type,$content_body) = getIndexPage();
+            ($content_type,$content_body) = getIndexPage($data_variables);
 
         }
 
     } catch {
         # Log errors, but render home page by default.
         print STDERR Dumper("An Error has occurred. $_");
-        ($content_type,$content_body) = getIndexPage();
+        ($content_type,$content_body) = getIndexPage($data_variables);
     };
 
 
@@ -85,6 +87,8 @@ sub getIndexPage {
     #
     ##
     #
+    my $data_variables = shift;
+
 
     my $content_type = 'text/html';
     my $content_body = qq~
@@ -97,7 +101,31 @@ sub getIndexPage {
 </head>
 <body>
 
-It works!
+<div class="container">
+    <div class="row">
+    <!-- errors -->
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="row">
+        <!-- content -->
+
+        <!-- new appointment form -->
+        <div class="col-md-8 align-middle">
+        test
+        </div>
+
+        <!-- existing appointments table -->
+        <div class="col-md-8 align-middle">
+        <table id="existing_appointments">
+        </table>
+        </div>
+
+    </div>
+</div>
+
 
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="/assets/js/jquery/jquery.min.js"></script>
