@@ -91,9 +91,19 @@ sub getIndexPage {
 <html>
 <head>
     <title>CGI Test</title>
+    <link href="/assets/css/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/assets/css/bootstrap/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />    
+    <link href="/assets/css/app/cgi.css" rel="stylesheet" type="text/css" />    
 </head>
 <body>
+
 It works!
+
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="/assets/js/jquery/jquery.min.js"></script>
+<script src="/assets/js/jquery-validate/jquery.validate.min.js"></script>
+<script src="/assets/js/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/js/app/cgi.js"></script>
 </body>
 </html>
 ~;

@@ -1,0 +1,17 @@
+{
+  "name": "cgi",
+  "homepage": "https://github.com/codertd/cgi",
+  "authors": [
+    "Tim Doyle <coder.td@gmail.com>"
+  ],
+  "description": "A simple cgi script for appointments.",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
