@@ -3,16 +3,18 @@ use strict;
 use warnings;
 
 use CGI;
-use JSON;
-
-use DBI;
 
 use Data::Dumper;
 use Try::Tiny;
 
 
+use lib '../lib';
 
+use cgi_module;
+
+# Start processing.
 main();
+
 
 exit;
 
@@ -23,7 +25,11 @@ exit;
 sub main {
     my $self = shift;
 
+
     my $q = CGI->new;
+    my $cgi_module = new cgi_module();
+
+
     my ($content_type, $content_body);
 
     try {
@@ -66,51 +72,10 @@ sub main {
         'content_body' => $content_body,
         'cgi'          => $q
     };
-    render( $self, $data );
+
+    print $cgi_module->render( $self, $data );
 
     return 1;
-}
-
-
-
-
-sub render {
-    my $self = shift;
-    my $data = shift;
-
-    die "Unable to render results." unless (
-        defined $data->{'content_type'} && 
-        defined $data->{'content_body'} &&
-        ref $data->{'cgi'} eq 'CGI'
-    );
-    #print STDERR Dumper($data);
-
-    print $data->{'cgi'}->header($data->{'content_type'});
-    print $data->{'content_body'}."\n";
-
-    return 1;
-}
-
-
-
-sub getDBH {
-    my $self = shift;
-
-    my $db_info = {
-        'db_host' => 'localhost',
-        'db_name' => 'cgi',
-        'db_user' => 'cgiuser',
-        'db_pass' => 'myp455123!!!',
-    };
-    
-    my $data_source = "dbi:mysql:database=".$db_info->{db_name}.':host='.$db_info->{db_host};
-
-    # make sure we reconnect if the conn dies
-    my $dbh = DBI->connect( $data_source, $db_info->{db_user}, $db_info->{db_pass},
-       { mysql_auto_reconnect => 1 },
-       );
-
-    return $dbh;
 }
 
 
@@ -138,7 +103,7 @@ sub getAjaxData {
     my $self = shift;
     my $query_param = shift;
 
-    my $json = JSON->new;
+    my $cgi_module = new cgi_module();
 
     my $content_type = 'application/json';
     my $content_body = {
@@ -146,8 +111,11 @@ sub getAjaxData {
         'test'  => 1
     };
 
+    my $dbh = $self->getDBH();
+
+
     # encode as json
-    $content_body = $json->encode($content_body);
+    $content_body = $cgi_module->getJSON->encode($content_body);
 
     return ($content_type,$content_body);
 }
