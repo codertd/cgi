@@ -87,16 +87,21 @@ sub getIndexPage {
     #
     ##
     #
+
+    # This is simple variable interpolation, so just strings not refs.
+    # I'd love to use TT here, but it needs to run with minimal includes.
     my $data_variables = shift;
 
+    $data_variables->{title} = 'CGI in Perl';
 
     my $content_type = 'text/html';
     my $content_body = qq~
 <html>
 <head>
-    <title>CGI Test</title>
+    <title>[% title %]</title>
     <link href="/assets/css/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="/assets/css/bootstrap/bootstrap-theme.min.css" rel="stylesheet" type="text/css" />    
+    <link href="/assets/css/bootstrap-datepicker/bootstrap-datepicker3.min.css" rel="stylesheet" type="text/css" />        
     <link href="/assets/css/app/cgi.css" rel="stylesheet" type="text/css" />    
 </head>
 <body>
@@ -114,7 +119,76 @@ sub getIndexPage {
 
         <!-- new appointment form -->
         <div class="col-md-8 align-middle">
-        test
+
+
+            <form class="form-horizontal">
+            <fieldset>
+
+                <div class="add_hide_fields">
+                    <!-- New div toggle -->
+                    <div class="form-group">
+                        <div class="col-md-3">
+                            <button id="new_show" name="new_show" class="btn btn-primary">NEW</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cancel_hide_fields" style="display:none;">
+
+                <!-- New div toggle -->
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <button id="new_add" name="new_add" class="btn btn-primary">ADD</button>
+                    </div>
+                    <div class="col-md-5">
+                        <button id="new_cancel" name="new_cancel" class="btn btn-danger">CANCEL</button>
+                    </div>
+                </div>
+
+                <!-- datepicker -->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="appointment_date">Date</label>  
+                    <div class="input-group date col-md-4" data-provide="datepicker">
+                        <input type="text" class="form-control input-md">
+                        <div class="input-group-addon">
+                            <span class="glyphicon glyphicon-th"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Text input-->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="Time">Time</label>  
+                    <div class="col-md-4">
+                        <input id="Time" name="Time" type="text" placeholder="Time" class="form-control input-md">
+                    </div>
+                </div>
+
+                <!-- Text input-->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="apppointment_description">Description</label>  
+                    <div class="col-md-4">
+                        <input id="apppointment_description" name="apppointment_description" type="text" placeholder="Description" class="form-control input-md">
+                    <span class="help-block">help</span>  
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <!-- Search Param and submit-->
+                <div class="form-group">
+                    <div class="col-md-4">
+                        <input id="search_input" name="search_input" type="text" class="form-control input-md">
+                    </div>
+                    <div class="col-md-4">
+                        <button id="search_button" name="search_button" class="btn btn-primary">SEARCH</button>
+                    </div>
+                </div>
+            </div>
+
+            </fieldset>
+            </form>
+
         </div>
 
         <!-- existing appointments table -->
@@ -136,10 +210,17 @@ sub getIndexPage {
 <script type="text/javascript" src="/assets/js/jquery/jquery.min.js"></script>
 <script type="text/javascript" src="/assets/js/jquery-validate/jquery.validate.min.js"></script>
 <script type="text/javascript" src="/assets/js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="/assets/js/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
 <script type="text/javascript" src="/assets/js/app/cgi.js"></script>
 </body>
 </html>
 ~;
+
+
+    while( my( $key, $value ) = each %{$data_variables} ){
+        $content_body =~ s/\[\% $key \%\]/$value/;
+    }
+
 
     return ($content_type,$content_body);
 }

@@ -1,7 +1,55 @@
 $(document).ready(function() {
+
+    $('.datepicker').datepicker({
+        format: 'mm/dd/yyyy',
+        startDate: '+1d'
+    });
+
     console.log("Appointment cgi ready!");
     getAppointments();
+
+    $("#new_show").click(function(event) {
+        toggleHiddenFields('open');
+    });
+
+    $("#new_cancel").click(function(event) {
+        toggleHiddenFields('closed');
+    });
+
+    $("#new_add").click(function(event) {
+        submitNewAppointment();
+    });
+
 });
+
+function toggleHiddenFields(state) {
+    // Prevent submit, we just want to toggle vis.
+    event.preventDefault();
+
+    if (state === 'open') {
+        $(".cancel_hide_fields").show();
+        $(".add_hide_fields").hide();
+    } else {
+        $(".cancel_hide_fields").hide();
+        $(".add_hide_fields").show();
+    }
+
+    return false;
+}
+
+
+function submitNewAppointment() {
+    // Prevent submit, we just want to toggle vis.
+    event.preventDefault();
+
+    console.log("Validating!");
+
+
+    console.log("submitting!");
+
+    return false;
+}
+
 
 
 function getAppointments() {
