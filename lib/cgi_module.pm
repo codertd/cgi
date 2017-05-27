@@ -38,6 +38,7 @@ sub render {
     my $output=$data->{'cgi'}->header($data->{'content_type'});
     $output.=$data->{'content_body'}."\n";
 
+    print STDERR $output;
     return $output;
 }
 
@@ -97,7 +98,7 @@ sub getAppointmentsJSONFromDB {
         push( @content, { %{$contentref} } );
     }
 
-    return $self->getJSON->encode(@content)
+    return $self->getJSON->encode(\@content)
 }
 
 

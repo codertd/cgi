@@ -9,34 +9,49 @@ function getAppointments() {
 
     var response;
     var url = '/index.cgi';
-    var data = {
-        //ajax_query: $('#search_params').val(),
-        ajax_query: '123',
-    };
-    console.log(data);
 
+
+    // Using the core $.ajax() method
     $.ajax({
-        async: true,
-        url: url,
-        data: data,
-        type: 'POST',
-        //contentType: "application/json; charset=utf-8",
-        timeout: 4000,
-        success: function(data) {
-            console.log(data);
 
-            //$.each(data, function(i, item) {
-            //    var markup = "<tr><td>" + item.appointment_time + "</td><td>" + item.appointment_description + "</td></tr>";
-            //    $("#existing_appointments tbody").append(markup);
-            //});
+            // The URL for the request
+            url: url,
 
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest);
-            response = XMLHttpRequest.responseJSON.error.Message;
-            console.log(response);
-        }
-    });
+            // The data to send (will be converted to a query string)
+            data: {
+                ajax_query: 123
+            },
+
+            // Whether this is a POST or GET request
+            type: "POST",
+
+            // The type of data we expect back
+            dataType: "json",
+        })
+        // Code to run if the request succeeds (is done);
+        // The response is passed to the function
+        .done(function(json) {
+
+            $('#existing_appointments tbody tr').remove();
+            $.each(json, function(i, item) {
+                console.log(item);
+                var date_time = item.appointment_time.split(" ");
+                var markup = "<tr><td>" + date_time[0] + "</td><td>" + date_time[1] + "</td><td>" + item.appointment_description + "</td></tr>";
+                $("#existing_appointments tbody").append(markup);
+            });
+        })
+        // Code to run if the request fails; the raw request and
+        // status codes are passed to the function
+        .fail(function(xhr, status, errorThrown) {
+            alert("Sorry, there was a problem!");
+            console.log("Error: " + errorThrown);
+            console.log("Status: " + status);
+            console.dir(xhr);
+        })
+        // Code to run regardless of success or failure;
+        .always(function(xhr, status) {
+            console.log("The request is complete!");
+        });
 
 
     return true;

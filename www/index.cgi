@@ -120,6 +120,11 @@ sub getIndexPage {
         <!-- existing appointments table -->
         <div class="col-md-8 align-middle">
         <table id="existing_appointments">
+            <thead>
+                <tr><th>Date</th><th>Time</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+            </tbody>
         </table>
         </div>
 
@@ -128,10 +133,10 @@ sub getIndexPage {
 
 
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="/assets/js/jquery/jquery.min.js"></script>
-<script src="/assets/js/jquery-validate/jquery.validate.min.js"></script>
-<script src="/assets/js/bootstrap/bootstrap.min.js"></script>
-<script src="/assets/js/app/cgi.js"></script>
+<script type="text/javascript" src="/assets/js/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/assets/js/jquery-validate/jquery.validate.min.js"></script>
+<script type="text/javascript" src="/assets/js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="/assets/js/app/cgi.js"></script>
 </body>
 </html>
 ~;
