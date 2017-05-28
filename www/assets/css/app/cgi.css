@@ -6,3 +6,9 @@
 .appointment_table td {
     padding-right: 25px;
 }
+
+.center-block {
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+}

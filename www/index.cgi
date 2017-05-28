@@ -108,6 +108,14 @@ sub getIndexPage {
 </head>
 <body>
 
+<div class="jumbotron">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8"><h2>Appointments</h2></div>
+        </div>
+    </div>
+</div>
+
 <!-- [% errors %] -->
 
 <div class="container">
@@ -183,7 +191,6 @@ sub getIndexPage {
 
             </fieldset>
             </form>
-
         </div>
 
         <!-- existing appointments table -->
