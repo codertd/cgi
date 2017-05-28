@@ -5,6 +5,42 @@ $(document).ready(function() {
         startDate: '+1d'
     });
 
+    $.validator.addMethod(
+        "time_regex",
+        function(value, element, regexp) {
+            var check = false;
+            return this.optional(element) || regexp.test(value);
+        },
+        "Please check the format of your time (HH:MMam)."
+    );
+
+    $("#appointment_form").validate({
+        rules: {
+            datepicker: "required",
+            appointment_time: {
+                required: true,
+                time_regex: /^\d\d\:\d\d[ap]m$/,
+                minlength: 7,
+                maxlength: 7,
+            },
+            appointment_description: {
+                required: true,
+                minlength: 10
+            },
+        },
+        messages: {
+            datepicker: "Please select a date on or after today.",
+            appointment_time: {
+                required: "Please enter an Appointment Time in the form HH:MMam or HH::MMpm",
+                minlength: "Your appointment time must be in the format HH:MMam or HH::MMpm."
+            },
+            appointment_description: {
+                required: "Please provide an Appointment Description.",
+                minlength: "Your description must be at least 10 characters long."
+            }
+        }
+    });
+
     getAppointments();
 
     $("#new_show").click(function(event) {
@@ -46,7 +82,13 @@ function submitNewAppointment() {
     event.preventDefault();
 
     console.log("Validating!");
+
+
     console.log("submitting!");
+
+    $("#appointment_form").submit();
+
+
 
     return false;
 }

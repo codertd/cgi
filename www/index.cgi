@@ -30,7 +30,6 @@ sub main {
     my $q = CGI->new;
     my $cgi_module = new cgi_module();
 
-
     my ($content_type, $content_body);
     my $data_variables = {}; # for interpolation of data
 
@@ -43,20 +42,28 @@ sub main {
         } elsif ($q->request_method eq 'POST') { # form post.
 
             print STDERR "Regular Post";
-
-            #print STDERR Dumper($q->request_method);
-            #print STDERR Dumper($q->param('test'));
-
-            #my @names = $q->param;
-            #print STDERR Dumper(@names);
+            print STDERR Dumper($q);
 
             # validate all input values
-            #validate_appointment_input($q);
+            my @validation_issues = $cgi_module->validateInputFormData($q);
 
-            # create the new appointment
-            #create_appointment($q);
+            print STDERR Dumper(@validation_issues);
 
+            if (! scalar @validation_issues ) {
+                    my $appointment_time = "2018-01-01 01:01:01";
+                    $cgi_module->createAppointment({
+                        'appointment_time' => $appointment_time,
+                        'appointment_description' => $q->param('appointment_description')
+                    });
+            } else {
 
+                foreach my $error (@validation_issues) {
+                    $data_variables->{errors}.=qq~<p>$error</p>~;
+                }
+
+            }
+
+            # show everything.
             ($content_type,$content_body) = getIndexPage($data_variables);
 
         } else { # default landing page.
@@ -123,7 +130,7 @@ sub getIndexPage {
         <div class="col-md-8 align-middle">
 
 
-            <form class="form-horizontal">
+            <form class="form-horizontal" id="appointment_form" name="appointment_form" method="POST">
             <fieldset>
 
                 <div class="add_hide_fields">
@@ -151,7 +158,7 @@ sub getIndexPage {
                 <div class="form-group">
                     <label class="col-md-4 control-label" for="appointment_date">Date</label>  
                     <div class="input-group date col-md-4" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-start-date="+1d">
-                        <input type="text" class="form-control input-md">
+                        <input required type="text" class="form-control input-md">
                         <div class="input-group-addon">
                             <span class="glyphicon glyphicon-th"></span>
                         </div>
@@ -160,18 +167,17 @@ sub getIndexPage {
 
                 <!-- Text input-->
                 <div class="form-group">
-                    <label class="col-md-4 control-label" for="Time">Time</label>  
+                    <label class="col-md-4 control-label" for="appointment_time">Time</label>  
                     <div class="col-md-4">
-                        <input id="Time" name="Time" type="text" placeholder="Time" class="form-control input-md">
+                        <input required id="appointment_time" name="appointment_time" type="text" placeholder="Time" class="form-control input-md">
                     </div>
                 </div>
 
                 <!-- Text input-->
                 <div class="form-group">
-                    <label class="col-md-4 control-label" for="apppointment_description">Description</label>  
+                    <label class="col-md-4 control-label" for="appointment_description">Description</label>  
                     <div class="col-md-4">
-                        <input id="apppointment_description" name="apppointment_description" type="text" placeholder="Description" class="form-control input-md">
-                    <span class="help-block">help</span>  
+                        <input required id="appointment_description" name="appointment_description" type="text" placeholder="Description" class="form-control input-md">
                     </div>
                 </div>
             </div>

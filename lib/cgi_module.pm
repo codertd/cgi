@@ -9,6 +9,8 @@ use warnings;
 use JSON;
 use DBI;
 
+use DateTime;
+
 use Try::Tiny;
 use Data::Dumper qw(Dumper);
 
@@ -38,6 +40,49 @@ sub render {
     $output.=$data->{'content_body'}."\n";
 
     return $output;
+}
+
+
+
+sub validateInputFormData {
+    my $self = shift;
+    my $cgi = shift;
+
+    #my $datestring = localtime;
+    #print STDERR Dumper($datestring);
+
+    my @validation_errors;
+   
+    unless ( $cgi->param('appointment_time') =~ /^\d{2}\:\d{2}[ap]m$/ ) {
+        push (@validation_errors, "Sorry, you must supply a valid Appt Time.");
+    }
+
+    unless ( $cgi->param('appointment_description') =~ /^[0-9A-Za-z\,\.\:\-\"\']+$/ ) {
+        push (@validation_errors, "Sorry, you must supply a valid Appt Description.");
+    }
+
+    if ( $cgi->param('appointment_date') !~ /^\d{4}\-\d{2}\-\d{2}$/ ) {
+        push (@validation_errors, "Sorry, you must supply a valid Appt Date (YYYY-MM-DD).");
+    } else {
+
+        my $dt_now   = DateTime->now;   # Stores current date and time as datetime object
+        my $dt_submitted = DateTime->new(
+            year => substr($cgi->param('appointment_date'),0,4),
+            month => substr($cgi->param('appointment_date'),6,2),
+            day => substr($cgi->param('appointment_date'),9,2),
+            hour => 0,
+            minute =>0,
+            second =>1,
+            time_zone => 'America/Los_Angeles'
+        );
+        my $cmp = DateTime->compare( $dt_submitted, $dt_now ); 
+        
+        unless ( $cmp < 0) {
+            push (@validation_errors, "Sorry, you must supply a valid Appt Date on or after today.");
+        }
+    }
+
+    return \@validation_errors;
 }
 
 
@@ -81,7 +126,7 @@ sub getAppointmentsJSONFromDB {
 
     if ( 
         defined $query_data->{ajax_search} && 
-        $query_data->{ajax_search} =~ /[0-9A-Za-z\,\.\:\-]+/
+        $query_data->{ajax_search} =~ /^[0-9A-Za-z\,\.\:\-]+$/
     ) {
         my $search_string = '%'.$query_data->{ajax_search}.'%';
         $sth =  $dbh->prepare("
@@ -115,6 +160,25 @@ sub getAppointmentsJSONFromDB {
     }
 
     return $self->getJSON->encode(\@content)
+}
+
+
+
+
+
+sub createAppointment {
+    my $self = shift;
+    my $query_data = shift;
+
+    my $dbh = $self->getDBH();
+    my $sth;
+
+    $sth =  $dbh->prepare("
+        insert into appointments values ('',?,?)
+    ");        
+    $sth->execute( $query_data->{appointment_time}, $query_data->{appointment_description} ) or die "Cant execute SQL statement: $DBI::errstr\n";
+
+    return 1;
 }
 
 
