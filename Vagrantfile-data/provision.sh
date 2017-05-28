@@ -12,14 +12,24 @@ conf_template() {
     cp $VAGRANTFILE_DATA/conf/$1 $PROJECT_ROOT/conf/$1
 }
 
+echo "-- Installing EPEL repo"
+package epel-release
+
 echo "-- Installing Apache"
 package httpd mod_ssl
+
+echo "-- Installing Perl deps"
+package perl-Try-Tiny
 
 echo "-- Installing PHP"
 package php php-mysql php-mbstring
 
+echo "-- Installing MySQL"
+package mysql-server
+
 echo "-- Setting up $PROJECT_NAME's Apache config"
 chmod 755 $PROJECT_ROOT/../
+sudo sed -i 's/\#EnableSendfile off/EnableSendfile on/' /etc/httpd/conf/httpd.conf
 #sudo sed -i '/DocumentRoot "\/var\/www\/html"/d' /etc/httpd/conf/httpd.conf
 #sudo cp $VAGRANTFILE_DATA/apache/sso.conf /etc/httpd/conf.d/sso.conf
 sudo service httpd restart
