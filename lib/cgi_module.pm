@@ -134,7 +134,8 @@ sub getAppointmentsJSONFromDB {
         my $search_string = '%'.$query_data->{ajax_search}.'%';
         $sth =  $dbh->prepare("
             select 
-                * 
+                *,
+                UNIX_TIMESTAMP(appointments.appointment_time) as appt_epoch 
             from 
                 appointments
             where 
@@ -146,7 +147,8 @@ sub getAppointmentsJSONFromDB {
     } else {
         $sth =  $dbh->prepare("
             select 
-                * 
+                *,
+                UNIX_TIMESTAMP(appointments.appointment_time) as appt_epoch
             from 
                 appointments
             order by appointment_time
@@ -159,6 +161,11 @@ sub getAppointmentsJSONFromDB {
     my @content;
     while ( my $contentref = $sth->fetchrow_hashref() )
     {
+        # do some date conversion for output for specified format.
+        my $dt = DateTime->from_epoch('epoch'=>$contentref->{'appt_epoch'});
+        $contentref->{'translated_date'}  = $dt->month_name().' '.$dt->day;
+        $contentref->{'translated_time'} = $dt->hour_12().':'.sprintf( "%02d",$dt->minute).$dt->am_or_pm;
+
         push( @content, { %{$contentref} } );
     }
 

@@ -134,8 +134,9 @@ function getAppointments(querystring) {
 
             $('#existing_appointments tbody tr').remove();
             $.each(json, function(i, item) {
-                var date_time = item.appointment_time.split(" ");
-                var markup = "<tr><td>" + date_time[0] + "</td><td>" + date_time[1] + "</td><td>" + item.appointment_description + "</td></tr>";
+                //var date_time = item.appointment_time.split(" ");
+                //var markup = "<tr><td>" + date_time[0] + "</td><td>" + date_time[1] + "</td><td>" + item.appointment_description + "</td></tr>";
+                var markup = "<tr><td>" + item.translated_date + "</td><td>" + item.translated_time + "</td><td>" + item.appointment_description + "</td></tr>";
                 $("#existing_appointments tbody").append(markup);
             });
         })
