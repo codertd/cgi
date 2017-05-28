@@ -148,7 +148,7 @@ sub getIndexPage {
                 <!-- datepicker -->
                 <div class="form-group">
                     <label class="col-md-4 control-label" for="appointment_date">Date</label>  
-                    <div class="input-group date col-md-4" data-provide="datepicker">
+                    <div class="input-group date col-md-4" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-start-date="+1d">
                         <input type="text" class="form-control input-md">
                         <div class="input-group-addon">
                             <span class="glyphicon glyphicon-th"></span>

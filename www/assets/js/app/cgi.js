@@ -6,7 +6,7 @@ $(document).ready(function() {
     });
 
     console.log("Appointment cgi ready!");
-    getAppointments();
+    getAppointments('');
 
     $("#new_show").click(function(event) {
         toggleHiddenFields('open');
@@ -18,6 +18,10 @@ $(document).ready(function() {
 
     $("#new_add").click(function(event) {
         submitNewAppointment();
+    });
+
+    $("#search_button").click(function(event) {
+        submitSearch();
     });
 
 });
@@ -50,9 +54,19 @@ function submitNewAppointment() {
     return false;
 }
 
+function submitSearch() {
+    // Prevent submit, we just want to toggle vis.
+    event.preventDefault();
+
+    console.log("Validating!");
 
 
-function getAppointments() {
+    console.log("submitting!");
+
+    return false;
+}
+
+function getAppointments(querystring) {
     console.log("in get appointments, sending ajax");
 
     var response;
@@ -67,7 +81,7 @@ function getAppointments() {
 
             // The data to send (will be converted to a query string)
             data: {
-                ajax_query: 123
+                ajax_query: querystring
             },
 
             // Whether this is a POST or GET request
