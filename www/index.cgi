@@ -41,24 +41,17 @@ sub main {
 
         } elsif ($q->request_method eq 'POST') { # form post.
 
-            print STDERR "Regular Post";
-            print STDERR Dumper($q);
-
             # validate all input values
-            my @validation_issues = $cgi_module->validateInputFormData($q);
+            my $validation_issues = $cgi_module->validateInputFormData($q);
 
-            print STDERR Dumper(@validation_issues);
+            if (! scalar @$validation_issues ) {
 
-            if (! scalar @validation_issues ) {
-                    my $appointment_time = "2018-01-01 01:01:01";
-                    $cgi_module->createAppointment({
-                        'appointment_time' => $appointment_time,
-                        'appointment_description' => $q->param('appointment_description')
-                    });
+                    $cgi_module->createAppointment($q);
+
             } else {
 
-                foreach my $error (@validation_issues) {
-                    $data_variables->{errors}.=qq~<p>$error</p>~;
+                foreach my $error (@$validation_issues) {
+                    $data_variables->{errors_block}.=qq~<p class="errors_block">$error</p>~;
                 }
 
             }
@@ -115,12 +108,7 @@ sub getIndexPage {
 </head>
 <body>
 
-<div class="container">
-    <div class="row">
-    <!-- errors -->
-    </div>
-</div>
-
+<!-- [% errors %] -->
 
 <div class="container">
     <div class="row">
@@ -128,7 +116,6 @@ sub getIndexPage {
 
         <!-- new appointment form -->
         <div class="col-md-8 align-middle">
-
 
             <form class="form-horizontal" id="appointment_form" name="appointment_form" method="POST">
             <fieldset>
@@ -158,7 +145,7 @@ sub getIndexPage {
                 <div class="form-group">
                     <label class="col-md-4 control-label" for="appointment_date">Date</label>  
                     <div class="input-group date col-md-4" data-provide="datepicker" data-date-format="yyyy-mm-dd" data-date-start-date="+1d">
-                        <input required type="text" class="form-control input-md">
+                        <input required type="text" class="form-control input-md" name="appointment_date" id="appointment_date">
                         <div class="input-group-addon">
                             <span class="glyphicon glyphicon-th"></span>
                         </div>
@@ -201,7 +188,7 @@ sub getIndexPage {
 
         <!-- existing appointments table -->
         <div class="col-md-8 align-middle">
-        <table id="existing_appointments">
+        <table id="existing_appointments" class="appointment_table">
             <thead>
                 <tr><th>Date</th><th>Time</th><th>Description</th></tr>
             </thead>
@@ -227,6 +214,19 @@ sub getIndexPage {
 
     while( my( $key, $value ) = each %{$data_variables} ){
         $content_body =~ s/\[\% $key \%\]/$value/;
+    }
+
+    if (defined $data_variables->{errors_block}) {
+
+        my $errors_content = qq~
+<div class="container">
+    <div class="row">
+        ~.$data_variables->{errors_block}.qq~
+    </div>
+</div>
+~;    
+        $content_body =~ s/\<\!\-\- \[\% errors \%\] \-\-\>/$errors_content/;
+
     }
 
 

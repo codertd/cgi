@@ -1,0 +1,8 @@
+.errors_block {
+    font-weight: bold;
+    color: red;
+}
+
+.appointment_table td {
+    padding-right: 25px;
+}

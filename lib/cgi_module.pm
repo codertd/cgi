@@ -10,6 +10,7 @@ use JSON;
 use DBI;
 
 use DateTime;
+use Date::Parse;
 
 use Try::Tiny;
 use Data::Dumper qw(Dumper);
@@ -48,37 +49,39 @@ sub validateInputFormData {
     my $self = shift;
     my $cgi = shift;
 
-    #my $datestring = localtime;
-    #print STDERR Dumper($datestring);
-
     my @validation_errors;
    
-    unless ( $cgi->param('appointment_time') =~ /^\d{2}\:\d{2}[ap]m$/ ) {
-        push (@validation_errors, "Sorry, you must supply a valid Appt Time.");
+    if ( $cgi->param('appointment_time') !~ /^\d{2}\:\d{2}[ap]m$/ ) {
+        push (@validation_errors, "Sorry, you must supply a valid Appt Time. ".'('.$cgi->param('appointment_time').')');
+    } else {
+        my $appointment_time = str2time ( $cgi->param('appointment_date').' '.$cgi->param('appointment_time') );
+        unless ( $appointment_time ) {
+            push (@validation_errors, "Sorry, you must supply a valid Appt Time. ".'('.$cgi->param('appointment_time').')');
+        }
     }
 
-    unless ( $cgi->param('appointment_description') =~ /^[0-9A-Za-z\,\.\:\-\"\']+$/ ) {
-        push (@validation_errors, "Sorry, you must supply a valid Appt Description.");
+    unless ( $cgi->param('appointment_description') =~ /^[0-9A-Za-z\,\.\:\-\"\'\s]+$/ ) {
+        push (@validation_errors, "Sorry, you must supply a valid Appt Description. ".'('.$cgi->param('appointment_description').')');
     }
 
     if ( $cgi->param('appointment_date') !~ /^\d{4}\-\d{2}\-\d{2}$/ ) {
-        push (@validation_errors, "Sorry, you must supply a valid Appt Date (YYYY-MM-DD).");
+        push (@validation_errors, "Sorry, you must supply a valid Appt Date (YYYY-MM-DD). ".'('.$cgi->param('appointment_date').')');
     } else {
 
         my $dt_now   = DateTime->now;   # Stores current date and time as datetime object
         my $dt_submitted = DateTime->new(
             year => substr($cgi->param('appointment_date'),0,4),
-            month => substr($cgi->param('appointment_date'),6,2),
-            day => substr($cgi->param('appointment_date'),9,2),
+            month => substr($cgi->param('appointment_date'),5,2),
+            day => substr($cgi->param('appointment_date'),8,2),
             hour => 0,
             minute =>0,
             second =>1,
             time_zone => 'America/Los_Angeles'
         );
-        my $cmp = DateTime->compare( $dt_submitted, $dt_now ); 
+        my $cmp = DateTime->compare( $dt_now, $dt_submitted ); 
         
         unless ( $cmp < 0) {
-            push (@validation_errors, "Sorry, you must supply a valid Appt Date on or after today.");
+            push (@validation_errors, "Sorry, you must supply a valid Appt Date on or after today. ".'('.$cgi->param('appointment_date').')');
         }
     }
 
@@ -168,15 +171,19 @@ sub getAppointmentsJSONFromDB {
 
 sub createAppointment {
     my $self = shift;
-    my $query_data = shift;
+    my $cgi = shift;
 
     my $dbh = $self->getDBH();
-    my $sth;
 
-    $sth =  $dbh->prepare("
+    my $appointment_time = str2time ( $cgi->param('appointment_date').' '.$cgi->param('appointment_time') );
+
+    my $dt_appt = DateTime->from_epoch(epoch => $appointment_time);
+    my $appt_time = $dt_appt->ymd.' '.$dt_appt->hms;
+
+    my $sth =  $dbh->prepare("
         insert into appointments values ('',?,?)
     ");        
-    $sth->execute( $query_data->{appointment_time}, $query_data->{appointment_description} ) or die "Cant execute SQL statement: $DBI::errstr\n";
+    $sth->execute( $appt_time, $cgi->param('appointment_description') ) or die "Cant execute SQL statement: $DBI::errstr\n";
 
     return 1;
 }
