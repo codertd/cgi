@@ -27,6 +27,8 @@ sub new {
 }
 
 
+# A simple check to see that our Render has its valid parts, 
+# and that an appropriate Header is set.
 sub render {
     my $self = shift;
     my $data = shift;
@@ -44,7 +46,9 @@ sub render {
 }
 
 
-
+# Make sure any Input data from the form passes validation on the backend,
+# and provide a  mechanism to pass an array of errors back so the user knows
+# what they need to fix.
 sub validateInputFormData {
     my $self = shift;
     my $cgi = shift;
@@ -89,6 +93,7 @@ sub validateInputFormData {
 }
 
 
+# A simple JSON helper.
 sub getJSON {
     my $self = shift;
 
@@ -97,7 +102,8 @@ sub getJSON {
     return $json;
 }
 
-
+# A way to get a handle for the database.
+# this should be offloaded into a conf file, outside of the DocumentRoot.
 sub getDBH {
     my $self = shift;
 
@@ -119,7 +125,8 @@ sub getDBH {
 }
 
 
-
+# Lookup appointments in the database.
+# If provided an optional search token, return only matching rows.
 sub getAppointmentsJSONFromDB {
     my $self = shift;
     my $query_data = shift;
@@ -175,13 +182,16 @@ sub getAppointmentsJSONFromDB {
 
 
 
-
+# Create a new appointment.
 sub createAppointment {
     my $self = shift;
     my $cgi = shift;
 
     die "Unable to create appointment." unless (
-        ref $cgi eq 'CGI'
+        ref $cgi eq 'CGI' &&
+        $cgi->param('appointment_date') &&
+        $cgi->param('appointment_time') &&
+        $cgi->param('appointment_description')
     );
 
     my $dbh = $self->getDBH();

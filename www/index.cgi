@@ -2,19 +2,23 @@
 use strict;
 use warnings;
 
+#
+# A simple perl cgi application the creates Appointments.
+# Uses CGI to get information from HTTP post/get/ajax.
+# Uses DBI to interface MySQL.
+#
+
+
 use CGI;
 
 use Data::Dumper;
 use Try::Tiny;
 
-
 use lib '../lib';
-
 use cgi_module;
 
 # Start processing.
 main();
-
 
 exit;
 
@@ -24,7 +28,9 @@ exit;
 
 sub main {
     #
-    ##
+    ## Main entry point for program.
+    #
+    # Contains the dispatch table, error catch mechanism, and render function.
     #
 
     my $q = CGI->new;
@@ -87,11 +93,11 @@ sub main {
 
 sub getIndexPage {
     #
-    ##
+    ## The home page for the app.
     #
 
-    # This is simple variable interpolation, so just strings not refs.
-    # I'd love to use TT here, but it needs to run with minimal includes.
+    # This is simple variable interpolation, so just strings not refs or complex objects.
+    # I'd love to use TT here, but keeping it simple.
     my $data_variables = shift;
 
     $data_variables->{title} = 'CGI in Perl';
@@ -219,10 +225,13 @@ sub getIndexPage {
 ~;
 
 
+    # Main interpolation.
     while( my( $key, $value ) = each %{$data_variables} ){
         $content_body =~ s/\[\% $key \%\]/$value/;
     }
 
+    # special case variable name
+    # css class found in cgi.css
     if (defined $data_variables->{errors_block}) {
 
         my $errors_content = qq~
@@ -236,14 +245,13 @@ sub getIndexPage {
 
     }
 
-
     return ($content_type,$content_body);
 }
 
 
 sub getAjaxData {
     #
-    ##
+    ## If the app does an ajax post and the ajax vars were found.
     #
 
     my $cgi = shift;
