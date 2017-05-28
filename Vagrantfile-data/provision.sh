@@ -19,7 +19,7 @@ echo "-- Installing Apache"
 package httpd mod_ssl
 
 echo "-- Installing Perl deps"
-package perl-Try-Tiny
+package perl-Try-Tiny perl-CGI perl-JSON
 
 echo "-- Installing PHP"
 package php php-mysql php-mbstring
