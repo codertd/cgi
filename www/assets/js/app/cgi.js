@@ -5,8 +5,7 @@ $(document).ready(function() {
         startDate: '+1d'
     });
 
-    console.log("Appointment cgi ready!");
-    getAppointments('');
+    getAppointments();
 
     $("#new_show").click(function(event) {
         toggleHiddenFields('open');
@@ -47,8 +46,6 @@ function submitNewAppointment() {
     event.preventDefault();
 
     console.log("Validating!");
-
-
     console.log("submitting!");
 
     return false;
@@ -58,45 +55,43 @@ function submitSearch() {
     // Prevent submit, we just want to toggle vis.
     event.preventDefault();
 
-    console.log("Validating!");
-
-
-    console.log("submitting!");
+    var querystring = $("#search_input").val();
+    getAppointments(querystring);
 
     return false;
 }
 
 function getAppointments(querystring) {
-    console.log("in get appointments, sending ajax");
 
     var response;
-    var url = '/index.cgi';
 
+    var datafields = {
+        ajax_query: 1,
+    };
+    if (typeof querystring != 'undefined') {
+        datafields.ajax_search = querystring;
+    };
+
+    var ajaxpost = {
+        // The URL for the request
+        url: '/index.cgi',
+
+        // The data to send (will be converted to a query string)
+        data: datafields,
+        // Whether this is a POST or GET request
+        type: "POST",
+        // The type of data we expect back
+        dataType: "json",
+    };
 
     // Using the core $.ajax() method
-    $.ajax({
-
-            // The URL for the request
-            url: url,
-
-            // The data to send (will be converted to a query string)
-            data: {
-                ajax_query: querystring
-            },
-
-            // Whether this is a POST or GET request
-            type: "POST",
-
-            // The type of data we expect back
-            dataType: "json",
-        })
+    $.ajax(ajaxpost)
         // Code to run if the request succeeds (is done);
         // The response is passed to the function
         .done(function(json) {
 
             $('#existing_appointments tbody tr').remove();
             $.each(json, function(i, item) {
-                console.log(item);
                 var date_time = item.appointment_time.split(" ");
                 var markup = "<tr><td>" + date_time[0] + "</td><td>" + date_time[1] + "</td><td>" + item.appointment_description + "</td></tr>";
                 $("#existing_appointments tbody").append(markup);
@@ -105,7 +100,7 @@ function getAppointments(querystring) {
         // Code to run if the request fails; the raw request and
         // status codes are passed to the function
         .fail(function(xhr, status, errorThrown) {
-            alert("Sorry, there was a problem!");
+            console.log("Sorry, there was a problem!");
             console.log("Error: " + errorThrown);
             console.log("Status: " + status);
             console.dir(xhr);

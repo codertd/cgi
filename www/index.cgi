@@ -42,6 +42,8 @@ sub main {
 
         } elsif ($q->request_method eq 'POST') { # form post.
 
+            print STDERR "Regular Post";
+
             #print STDERR Dumper($q->request_method);
             #print STDERR Dumper($q->param('test'));
 
@@ -233,19 +235,16 @@ sub getAjaxData {
 
     my $cgi = shift;
 
-    print STDERR Dumper($cgi);
-
     my $cgi_module = new cgi_module();
 
-    my $content_type = 'application/json';
-    my $content_body = {
-        'query' => $cgi->param('ajax_query'),
-        'test'  => 1
+    my $query_data = {};
+    if ( $cgi->param('ajax_search') ) {
+        $query_data->{'ajax_search'} = $cgi->param('ajax_search');
     };
 
-    # Get all appointments, and return encoded as json.
-    $content_body = $cgi_module->getAppointmentsJSONFromDB();
-    print STDERR $content_body;
+    # Get matching/all appointments, and return encoded as json.
+    my $content_type = 'application/json';    
+    my $content_body = $cgi_module->getAppointmentsJSONFromDB($query_data);
 
     return ($content_type,$content_body);
 }

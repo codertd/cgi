@@ -33,12 +33,10 @@ sub render {
         defined $data->{'content_body'} &&
         ref $data->{'cgi'} eq 'CGI'
     );
-    #print STDERR Dumper($data);
 
     my $output=$data->{'cgi'}->header($data->{'content_type'});
     $output.=$data->{'content_body'}."\n";
 
-    print STDERR $output;
     return $output;
 }
 
@@ -47,7 +45,6 @@ sub getJSON {
     my $self = shift;
 
     my $json = JSON->new;
-    print STDERR Dumper($json);
 
     return $json;
 }
@@ -77,19 +74,38 @@ sub getDBH {
 
 sub getAppointmentsJSONFromDB {
     my $self = shift;
-
-    print STDERR Dumper("self is: ".$self);
+    my $query_data = shift;
 
     my $dbh = $self->getDBH();
+    my $sth;
 
-    my $sth =  $dbh->prepare("
-        select 
-            * 
-        from 
-            appointments
-        order by appointment_time
-    ");
-    $sth->execute() or die "Cant execute SQL statement: $DBI::errstr\n";
+    if ( 
+        defined $query_data->{ajax_search} && 
+        $query_data->{ajax_search} =~ /[0-9A-Za-z\,\.\:\-]+/
+    ) {
+        my $search_string = '%'.$query_data->{ajax_search}.'%';
+        $sth =  $dbh->prepare("
+            select 
+                * 
+            from 
+                appointments
+            where 
+                appointment_time like ? or
+                appointment_description like ?
+            order by appointment_time
+        ");
+        $sth->execute( $search_string, $search_string ) or die "Cant execute SQL statement: $DBI::errstr\n";
+    } else {
+        $sth =  $dbh->prepare("
+            select 
+                * 
+            from 
+                appointments
+            order by appointment_time
+        ");        
+        $sth->execute() or die "Cant execute SQL statement: $DBI::errstr\n";
+    };
+
 
     # json-ify
     my @content;
