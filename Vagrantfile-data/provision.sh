@@ -19,7 +19,7 @@ echo "-- Installing Apache"
 package httpd mod_ssl
 
 echo "-- Installing Perl deps"
-package perl-Try-Tiny perl-CGI perl-JSON
+package perl-Try-Tiny perl-CGI perl-JSON perl-Test-Most perl-DateTime perl-TimeDate
 
 echo "-- Installing PHP"
 package php php-mysql php-mbstring
@@ -29,9 +29,9 @@ package mysql-server
 
 echo "-- Setting up $PROJECT_NAME's Apache config"
 chmod 755 $PROJECT_ROOT/../
-sudo sed -i 's/\#EnableSendfile off/EnableSendfile on/' /etc/httpd/conf/httpd.conf
+#sudo sed -i 's/\#EnableSendfile off/EnableSendfile on/' /etc/httpd/conf/httpd.conf
 #sudo sed -i '/DocumentRoot "\/var\/www\/html"/d' /etc/httpd/conf/httpd.conf
-#sudo cp $VAGRANTFILE_DATA/apache/sso.conf /etc/httpd/conf.d/sso.conf
+sudo cp $VAGRANTFILE_DATA/conf/httpd/httpd.conf /etc/httpd/conf/httpd.conf
 sudo service httpd restart
 
 #echo "-- Creating $PROJECT_NAME configuration"

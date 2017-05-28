@@ -173,6 +173,10 @@ sub createAppointment {
     my $self = shift;
     my $cgi = shift;
 
+    die "Unable to create appointment." unless (
+        ref $cgi eq 'CGI'
+    );
+
     my $dbh = $self->getDBH();
 
     my $appointment_time = str2time ( $cgi->param('appointment_date').' '.$cgi->param('appointment_time') );
