@@ -59,6 +59,18 @@ $(document).ready(function() {
         submitSearch();
     });
 
+    // disable enter so form doesnt submit accidentally,
+    // but dynamically change the results based on content
+    // of search box.
+    // TODO: we cant search for the displayed date/time, which is confusing.
+    $('form input').on('keypress', function(e) {
+        return e.which !== 13;
+    });
+    $('#search_input').on('keypress', function(e) {
+        var querystring = $("#search_input").val();
+        getAppointments(querystring);
+        return e.which !== 13;
+    });
 });
 
 function toggleHiddenFields(state) {
@@ -81,14 +93,7 @@ function submitNewAppointment() {
     // Prevent submit, we just want to toggle vis.
     event.preventDefault();
 
-    console.log("Validating!");
-
-
-    console.log("submitting!");
-
     $("#appointment_form").submit();
-
-
 
     return false;
 }

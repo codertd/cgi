@@ -134,23 +134,42 @@ sub getAppointmentsJSONFromDB {
     my $dbh = $self->getDBH();
     my $sth;
 
+    # We cant to an SQL select with a alias column in the where clause.
+    # I.E. We see "December 24" in the Date display (formatted per spec),
+    # but typing in Dec wouldnt produce results, as the appointment_time column
+    # is datetime, and is mostly numeric.
+    # so we need to do a little sql magic, in order to make the date/time values show up
+    # as searchable data.
     if ( 
         defined $query_data->{ajax_search} && 
-        $query_data->{ajax_search} =~ /^[0-9A-Za-z\,\.\:\-]+$/
+        $query_data->{ajax_search} =~ /^[0-9A-Za-z\,\.\:\-\s]+$/
     ) {
         my $search_string = '%'.$query_data->{ajax_search}.'%';
         $sth =  $dbh->prepare("
-            select 
-                *,
-                UNIX_TIMESTAMP(appointments.appointment_time) as appt_epoch 
+        select t1.custom_date,t2.* 
             from 
+            (select 
+                appointment_id,
+                date_format(appointment_time,'%M %e %l:%i%p') as custom_date
+                from 
                 appointments
-            where 
-                appointment_time like ? or
-                appointment_description like ?
-            order by appointment_time
+                order by appointment_time
+            ) as t1 
+            left join 
+            (select 
+                *,
+                UNIX_TIMESTAMP(appointments.appointment_time) as appt_epoch
+                from 
+                appointments
+            ) as t2 
+                on t1.appointment_id = t2.appointment_id
+            where
+                t2.appointment_time like ? or
+                t2.appointment_description like ? or
+                t1.custom_date like ?
+            order by appointment_time            
         ");
-        $sth->execute( $search_string, $search_string ) or die "Cant execute SQL statement: $DBI::errstr\n";
+        $sth->execute( $search_string, $search_string, $search_string ) or die "Cant execute SQL statement: $DBI::errstr\n";
     } else {
         $sth =  $dbh->prepare("
             select 
@@ -172,7 +191,6 @@ sub getAppointmentsJSONFromDB {
         my $dt = DateTime->from_epoch('epoch'=>$contentref->{'appt_epoch'});
         $contentref->{'translated_date'}  = $dt->month_name().' '.$dt->day;
         $contentref->{'translated_time'} = $dt->hour_12().':'.sprintf( "%02d",$dt->minute).$dt->am_or_pm;
-
         push( @content, { %{$contentref} } );
     }
 
@@ -198,7 +216,7 @@ sub createAppointment {
 
     my $appointment_time = str2time ( $cgi->param('appointment_date').' '.$cgi->param('appointment_time') );
 
-    my $dt_appt = DateTime->from_epoch(epoch => $appointment_time);
+    my $dt_appt = DateTime->from_epoch(epoch => $appointment_time,time_zone => 'America/Los_Angeles');
     my $appt_time = $dt_appt->ymd.' '.$dt_appt->hms;
 
     my $sth =  $dbh->prepare("

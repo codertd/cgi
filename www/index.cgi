@@ -73,6 +73,7 @@ sub main {
     } catch {
         # Log errors, but render home page by default.
         print STDERR Dumper("An Error has occurred. $_");
+        $data_variables->{errors_block}=qq~<p class="errors_block">I've encountered an issue: $_</p>~;
         ($content_type,$content_body) = getIndexPage($data_variables);
     };
 
